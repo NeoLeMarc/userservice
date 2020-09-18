@@ -53,7 +53,7 @@ public class UserserviceApplication {
 
   @GetMapping("/hello")
   public String hello(@RequestParam(value = "name", defaultValue = "World") String name){
-    return "Hello " + name + '!';
+    return "Hello from userservice" + name + '!';
   }
 
 }
