@@ -10,7 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -65,5 +68,29 @@ public class UserserviceApplication {
   public Optional<User> getUser(@RequestParam(value = "username") String username){
     Optional<User> user = repository.findById(username);
     return user;
+  }
+
+  @PostMapping(value = "/user", consumes = "application/json", produces = "application/json")
+  public Optional<User> setUser(@RequestBody User user){
+    logger.info(user.toString());
+    String cryptedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+    user.setPassword(cryptedPassword);
+    repository.save(user);
+    return repository.findById(user.getUsername());
+  }
+
+  @PostMapping(value = "/user/verify", produces = "application/json")
+  public User verifyUserPassword(@RequestParam("username") String username, @RequestParam("password") String password){
+    Optional<User> ouser = repository.findById(username);
+    if(ouser.isEmpty()){
+      BCrypt.checkpw(password, BCrypt.gensalt()+"asdf");
+      return null;
+    }
+
+    User user = ouser.get();
+    if(BCrypt.checkpw(password, user.getPassword())){
+      return user;
+    }
+    return null;
   }
 }
