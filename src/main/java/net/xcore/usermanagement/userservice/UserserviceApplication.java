@@ -2,8 +2,12 @@ package net.xcore.usermanagement.userservice;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
+import net.xcore.usermanagement.userservice.dao.UserRepository;
+import net.xcore.usermanagement.userservice.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +20,8 @@ public class UserserviceApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(UserserviceApplication.class);
 
+  @Autowired
+  UserRepository repository;
 
   public static void main(String[] args) {
     if (args != null) {
@@ -50,10 +56,14 @@ public class UserserviceApplication {
     }
   }
 
-
   @GetMapping("/hello")
   public String hello(@RequestParam(value = "name", defaultValue = "World") String name){
     return "Hello from userservice" + name + '!';
   }
 
+  @GetMapping("/user")
+  public Optional<User> getUser(@RequestParam(value = "username") String username){
+    Optional<User> user = repository.findById(username);
+    return user;
+  }
 }
