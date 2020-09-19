@@ -3,11 +3,11 @@ package net.xcore.usermanagement.userservice;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
 @RestController
+@RequiredArgsConstructor
 public class UserserviceApplication {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserserviceApplication.class);
+  private static final Logger logger = LoggerFactory.getLogger(UserserviceApplication.class);
 
-  @Autowired
-  UserRepository repository;
+  private final UserRepository repository;
 
   public static void main(String[] args) {
     if (args != null) {
