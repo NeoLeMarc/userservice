@@ -1,5 +1,6 @@
 package net.xcore.usermanagement.userservice.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -10,15 +11,11 @@ import org.springframework.data.cassandra.core.cql.CqlTemplate;
 import org.springframework.data.cassandra.core.cql.session.DefaultSessionFactory;
 
 @EnableConfigurationProperties(VaultCassandraConfig.class)
+@RequiredArgsConstructor
 @Configuration
 public class ApplicationConfiguration {
 
-  @Autowired
   private final VaultCassandraConfig config;
-
-  public ApplicationConfiguration(VaultCassandraConfig config) {
-    this.config = config;
-  }
 
   @Bean
   public CqlSessionFactoryBean session() {
