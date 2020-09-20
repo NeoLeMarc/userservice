@@ -6,19 +6,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.util.Optional;
-import javax.annotation.PostConstruct;
 import lombok.val;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.MockitoRule;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserserviceApplicationUnitTest {
@@ -27,7 +23,10 @@ public class UserserviceApplicationUnitTest {
   public static final String TESTUSER_PASSWORT = "testpasswort";
   public static final String TESTUSER_ROLE = "testrole";
   @Mock
-  private UserRepository repository;
+  private UserRepository repositoryMock;
+
+  @Mock
+  private UserserviceApplication.Runner runnerMock;
 
   @Before
   public void initMocks() {
@@ -37,15 +36,24 @@ public class UserserviceApplicationUnitTest {
     user.setRole(TESTUSER_ROLE);
 
     Optional<User> ouser = Optional.of(user);
-    Mockito.when(repository.findById(Mockito.eq(TESTUSER_USERNAME))).thenReturn(ouser);
+    Mockito.when(repositoryMock.findById(Mockito.eq(TESTUSER_USERNAME))).thenReturn(ouser);
+
+    UserserviceApplication.setRunner(runnerMock);
   }
 
   @Test
   public void testApplicationCallsRepositoryWhenCallingGetUser(){
-    UserserviceApplication application = new UserserviceApplication(repository);
+    UserserviceApplication application = new UserserviceApplication(repositoryMock);
     val user = application.getUser(TESTUSER_USERNAME);
-    verify(repository, times(1)).findById(TESTUSER_USERNAME);
+    verify(repositoryMock, times(1)).findById(TESTUSER_USERNAME);
     assertTrue(user.isPresent());
     assertThat(user.get().getUsername()).isEqualTo(TESTUSER_USERNAME);
+  }
+
+  @Test
+  public void testPublicStaticVoidMain(){
+    String[] args = new String[0];
+    UserserviceApplication.main(args);
+    verify(runnerMock, times(1)).run(args);
   }
 }

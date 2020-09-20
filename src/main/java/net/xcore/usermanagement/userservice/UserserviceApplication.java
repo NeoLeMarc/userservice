@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
 import org.slf4j.Logger;
@@ -26,6 +27,14 @@ public class UserserviceApplication {
 
   private final UserRepository repository;
 
+  static class Runner {
+    void run(String[] args) {
+      SpringApplication.run(UserserviceApplication.class, args);
+    }
+  }
+
+  @Setter private static Runner runner;
+
   public static void main(String[] args) {
     if (args != null) {
       logger.info("main({})", (Object) args);
@@ -47,7 +56,7 @@ public class UserserviceApplication {
     } else {
       loadBootstrapConfiguration("/home/marcel/properties/userservice/dev.properties");
     }
-    SpringApplication.run(UserserviceApplication.class, args);
+    runner.run(args);
   }
 
   private static void loadBootstrapConfiguration(String path) {
