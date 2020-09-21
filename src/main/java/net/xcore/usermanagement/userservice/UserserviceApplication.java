@@ -1,5 +1,6 @@
 package net.xcore.usermanagement.userservice;
 
+import io.netty.util.internal.StringUtil;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -90,7 +92,14 @@ public class UserserviceApplication {
   @PostMapping(value = "/user", consumes = "application/json", produces = "application/json")
   public Optional<User> setUser(@RequestBody User user){
     logger.info(user.toString());
-    String cryptedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+
+    String password = user.getPassword();
+    if(StringUtils.isEmpty(password)) {
+      logger.warn("Warning: empty password");
+      password = "";
+    }
+
+    String cryptedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
     user.setPassword(cryptedPassword);
     repository.save(user);
     return repository.findById(user.getUsername());

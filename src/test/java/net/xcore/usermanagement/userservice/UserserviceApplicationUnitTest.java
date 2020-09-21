@@ -23,11 +23,13 @@ public class UserserviceApplicationUnitTest {
   public static final String TESTUSER_USERNAME = "testuser";
   public static final String TESTUSER_PASSWORT = "testpasswort";
   public static final String TESTUSER_ROLE = "testrole";
+  public static final String SPRING_BOOT_PROPERTY_LOCATION = "/does/not/exist.properties";
   @Mock
   private UserRepository repositoryMock;
 
   @Mock
   private UserserviceApplication.Runner runnerMock;
+  private UserserviceApplication application;
 
   @SuppressWarnings("NewClassNamingConvention")
   private static class FilesHelperWrapperMock extends FilesHelper {
@@ -56,11 +58,11 @@ public class UserserviceApplicationUnitTest {
 
     UserserviceApplication.setRunner(runnerMock);
     UserserviceApplication.setFilesHelper(filesHelperWrapperMock);
+    application = new UserserviceApplication(repositoryMock);
   }
 
   @Test
   public void testApplicationCallsRepositoryWhenCallingGetUser(){
-    UserserviceApplication application = new UserserviceApplication(repositoryMock);
     val user = application.getUser(TESTUSER_USERNAME);
     verify(repositoryMock, times(1)).findById(TESTUSER_USERNAME);
     assertTrue(user.isPresent());
@@ -76,9 +78,28 @@ public class UserserviceApplicationUnitTest {
 
   @Test
   public void testPublicStaticVoidMainWithArgumentsSetsPropertiesLocationIfFileExists(){
-    String[] args = {"/does/not/exist.properties"};
+    String[] args = {SPRING_BOOT_PROPERTY_LOCATION};
     UserserviceApplication.main(args);
     assertThat(filesHelperWrapperMock.wasCalled).isTrue();
     assertThat(filesHelperWrapperMock.callCount).isEqualTo(1);
+    assertThat(System.getProperty("spring.cloud.bootstrap.location")).isEqualTo(
+        SPRING_BOOT_PROPERTY_LOCATION);
+  }
+
+  @Test
+  public void testApplicationCallsRepositoryWhenCallingSetUser(){
+    User user = new User();
+    application.setUser(user);
+    verify(repositoryMock, times(1)).save(user);
+    assertIsBcryptHash(user);
+    System.out.println(user);
+
+  }
+
+  private static void assertIsBcryptHash(User user) {
+    assertThat(user.getPassword().length()).isGreaterThanOrEqualTo(60);
+    assertThat(user.getPassword()).startsWith("$");
+    assertThat(user.getPassword().charAt(3)).isEqualTo('$');
+    assertThat(user.getPassword().charAt(6)).isEqualTo('$');
   }
 }
