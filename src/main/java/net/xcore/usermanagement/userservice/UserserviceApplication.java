@@ -35,6 +35,14 @@ public class UserserviceApplication {
 
   @Setter private static Runner runner;
 
+  static class FilesHelper{
+    public boolean doesFileExist(String path){
+      return Files.exists(Paths.get(path));
+    }
+  }
+
+  @Setter private static FilesHelper filesHelper = new FilesHelper();
+
   public static void main(String[] args) {
     if (args != null) {
       logger.info("main({})", (Object) args);
@@ -60,7 +68,7 @@ public class UserserviceApplication {
   }
 
   private static void loadBootstrapConfiguration(String path) {
-    if (Files.exists(Paths.get(path))) {
+    if (filesHelper.doesFileExist(path)) {
       logger.info("Found bootstrap properties {} - updating spring.cloud.bootstrap.location", path);
       System.setProperty("spring.cloud.bootstrap.location", path);
     } else {
@@ -74,7 +82,7 @@ public class UserserviceApplication {
   }
 
   @GetMapping("/user")
-  public Optional<User> getUser(@RequestParam(value = "username") String username){
+  public Optional<User> getUser(@RequestParam("username") String username){
     Optional<User> user = repository.findById(username);
     return user;
   }
