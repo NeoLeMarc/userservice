@@ -35,7 +35,7 @@ public class UserserviceApplication {
     }
   }
 
-  @Setter private static Runner runner;
+  @Setter private static Runner runner = new Runner();
 
   static class FilesHelper{
     public boolean doesFileExist(String path){
