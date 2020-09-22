@@ -1,6 +1,5 @@
 package net.xcore.usermanagement.userservice;
 
-import io.netty.util.internal.StringUtil;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -37,13 +36,29 @@ public class UserserviceApplication {
 
   @Setter private static Runner runner = new Runner();
 
-  static class FilesHelper{
+  static class FilesHelper {
     public boolean doesFileExist(String path){
       return Files.exists(Paths.get(path));
     }
   }
 
   @Setter private static FilesHelper filesHelper = new FilesHelper();
+
+  static class BCryptHelper {
+    public String hashpw(String password, String salt){
+      return BCrypt.hashpw(password, salt);
+    }
+
+    public String gensalt(){
+      return BCrypt.gensalt();
+    }
+
+    public boolean checkpw(String password, String hashed){
+      return BCrypt.checkpw(password, hashed);
+    }
+  }
+
+  @Setter private static BCryptHelper bcryptHelper = new BCryptHelper();
 
   public static void main(String[] args) {
     if (args != null) {
@@ -99,7 +114,7 @@ public class UserserviceApplication {
       password = "";
     }
 
-    String cryptedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+    String cryptedPassword = bcryptHelper.hashpw(password, BCrypt.gensalt());
     user.setPassword(cryptedPassword);
     repository.save(user);
     return repository.findById(user.getUsername());
@@ -109,12 +124,12 @@ public class UserserviceApplication {
   public User verifyUserPassword(@RequestParam("username") String username, @RequestParam("password") String password){
     Optional<User> ouser = repository.findById(username);
     if(ouser.isEmpty()){
-      BCrypt.checkpw(password, BCrypt.gensalt()+"asdf");
+      bcryptHelper.checkpw(password, BCrypt.gensalt()+"asdf");
       return null;
     }
 
     User user = ouser.get();
-    if(BCrypt.checkpw(password, user.getPassword())){
+    if(bcryptHelper.checkpw(password, user.getPassword())){
       return user;
     }
     return null;

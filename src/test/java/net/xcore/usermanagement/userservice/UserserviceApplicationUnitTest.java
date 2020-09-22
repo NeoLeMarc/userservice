@@ -45,6 +45,7 @@ public class UserserviceApplicationUnitTest {
   }
 
   private final FilesHelperWrapperMock filesHelperWrapperMock = new FilesHelperWrapperMock();
+  private final UserserviceApplication.BCryptHelper bcryptHelperMock = Mockito.mock(UserserviceApplication.BCryptHelper.class);
 
   @Before
   public void initMocks() {
@@ -58,6 +59,7 @@ public class UserserviceApplicationUnitTest {
 
     UserserviceApplication.setRunner(runnerMock);
     UserserviceApplication.setFilesHelper(filesHelperWrapperMock);
+
     application = new UserserviceApplication(repositoryMock);
   }
 
@@ -101,5 +103,11 @@ public class UserserviceApplicationUnitTest {
     assertThat(user.getPassword()).startsWith("$");
     assertThat(user.getPassword().charAt(3)).isEqualTo('$');
     assertThat(user.getPassword().charAt(6)).isEqualTo('$');
+  }
+
+  private void testVerifyUserPasswordCallsBcrypt(){
+    UserserviceApplication.setBcryptHelper(bcryptHelperMock);
+    application.verifyUserPassword("testuser", "testpasswort");
+    verify(bcryptHelperMock, Mockito.times(1)).hashpw(Mockito.any(), Mockito.any());
   }
 }
