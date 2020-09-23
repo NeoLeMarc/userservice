@@ -30,6 +30,7 @@ public class UserserviceApplicationUnitTest {
   @Mock
   private UserserviceApplication.Runner runnerMock;
   private UserserviceApplication application;
+  private User user;
 
   @SuppressWarnings("NewClassNamingConvention")
   private static class FilesHelperWrapperMock extends FilesHelper {
@@ -49,7 +50,7 @@ public class UserserviceApplicationUnitTest {
 
   @Before
   public void initMocks() {
-    User user = new User();
+    user = new User();
     user.setPassword(TESTUSER_PASSWORT);
     user.setUsername(TESTUSER_USERNAME);
     user.setRole(TESTUSER_ROLE);
@@ -105,9 +106,10 @@ public class UserserviceApplicationUnitTest {
     assertThat(user.getPassword().charAt(6)).isEqualTo('$');
   }
 
-  private void testVerifyUserPasswordCallsBcrypt(){
+  @Test
+  public void testVerifyUserPasswordCallsBcryptWhenUserExists(){
     UserserviceApplication.setBcryptHelper(bcryptHelperMock);
-    application.verifyUserPassword("testuser", "testpasswort");
-    verify(bcryptHelperMock, Mockito.times(1)).hashpw(Mockito.any(), Mockito.any());
+    application.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORT);
+    verify(bcryptHelperMock, Mockito.times(1)).checkpw(TESTUSER_PASSWORT, user.getPassword());
   }
 }
