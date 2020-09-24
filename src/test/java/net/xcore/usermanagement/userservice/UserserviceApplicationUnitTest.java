@@ -16,12 +16,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserserviceApplicationUnitTest {
 
   public static final String TESTUSER_USERNAME = "testuser";
-  public static final String TESTUSER_PASSWORT = "testpasswort";
+  public static final String TESTUSER_UNHASHED_PASSWORT = "testpasswort";
+  public static final String TESTUSER_PASSWORT =  BCrypt.hashpw(TESTUSER_UNHASHED_PASSWORT, BCrypt.gensalt());
   public static final String TESTUSER_ROLE = "testrole";
   public static final String SPRING_BOOT_PROPERTY_LOCATION = "/does/not/exist.properties";
   @Mock
@@ -111,5 +113,19 @@ public class UserserviceApplicationUnitTest {
     UserserviceApplication.setBcryptHelper(bcryptHelperMock);
     application.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORT);
     verify(bcryptHelperMock, Mockito.times(1)).checkpw(TESTUSER_PASSWORT, user.getPassword());
+  }
+
+  @Test
+  public void testVerifyUserPasswordCorrectlyVerifiesCorrectPassword(){
+    UserserviceApplication.setBcryptHelper(bcryptHelperMock);
+    val ret = application.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORT);
+    assertThat(ret).isNotNull();
+  }
+
+  @Test
+  public void testVerifyUserPasswordCorrectlyRejectsWrongPassword(){
+    UserserviceApplication.setBcryptHelper(bcryptHelperMock);
+    val ret = application.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORT + "2");
+    assertThat(ret).isNull();
   }
 }
