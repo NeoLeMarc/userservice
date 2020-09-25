@@ -8,6 +8,8 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 import java.util.Optional;
 import lombok.val;
 import net.xcore.usermanagement.userservice.UserserviceApplication.FilesHelper;
+import net.xcore.usermanagement.userservice.controller.UserController;
+import net.xcore.usermanagement.userservice.controller.UserController.BCryptHelper;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
 import org.junit.Before;
@@ -19,11 +21,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UserserviceApplicationUnitTest {
+public class UserserviceApplicationAndControllerUnitTest {
 
   public static final String TESTUSER_USERNAME = "testuser";
-  public static final String TESTUSER_UNHASHED_PASSWORT = "testpasswort";
-  public static final String TESTUSER_PASSWORT =  BCrypt.hashpw(TESTUSER_UNHASHED_PASSWORT, BCrypt.gensalt());
+  public static final String TESTUSER_UNHASHED_PASSWORD = "testpasswort";
+  public static final String TESTUSER_PASSWORD =  BCrypt.hashpw(TESTUSER_UNHASHED_PASSWORD, BCrypt.gensalt());
   public static final String TESTUSER_ROLE = "testrole";
   public static final String SPRING_BOOT_PROPERTY_LOCATION = "/does/not/exist.properties";
   @Mock
@@ -31,7 +33,7 @@ public class UserserviceApplicationUnitTest {
 
   @Mock
   private UserserviceApplication.Runner runnerMock;
-  private UserserviceApplication application;
+  private UserController controller;
   private User user;
 
   @SuppressWarnings("NewClassNamingConvention")
@@ -48,12 +50,12 @@ public class UserserviceApplicationUnitTest {
   }
 
   private final FilesHelperWrapperMock filesHelperWrapperMock = new FilesHelperWrapperMock();
-  private final UserserviceApplication.BCryptHelper bcryptHelperMock = Mockito.mock(UserserviceApplication.BCryptHelper.class);
+  private final UserController.BCryptHelper bcryptHelperMock = Mockito.mock(UserController.BCryptHelper.class);
 
   @Before
   public void initMocks() {
     user = new User();
-    user.setPassword(TESTUSER_PASSWORT);
+    user.setPassword(TESTUSER_PASSWORD);
     user.setUsername(TESTUSER_USERNAME);
     user.setRole(TESTUSER_ROLE);
 
@@ -63,12 +65,12 @@ public class UserserviceApplicationUnitTest {
     UserserviceApplication.setRunner(runnerMock);
     UserserviceApplication.setFilesHelper(filesHelperWrapperMock);
 
-    application = new UserserviceApplication(repositoryMock);
+    controller = new UserController(repositoryMock);
   }
 
   @Test
   public void testApplicationCallsRepositoryWhenCallingGetUser(){
-    val user = application.getUser(TESTUSER_USERNAME);
+    val user = controller.getUser(TESTUSER_USERNAME);
     verify(repositoryMock, times(1)).findById(TESTUSER_USERNAME);
     assertTrue(user.isPresent());
     assertThat(user.get().getUsername()).isEqualTo(TESTUSER_USERNAME);
@@ -94,7 +96,7 @@ public class UserserviceApplicationUnitTest {
   @Test
   public void testApplicationCallsRepositoryWhenCallingSetUser(){
     User user = new User();
-    application.setUser(user);
+    controller.setUser(user);
     verify(repositoryMock, times(1)).save(user);
     assertIsBcryptHash(user);
     System.out.println(user);
@@ -110,22 +112,22 @@ public class UserserviceApplicationUnitTest {
 
   @Test
   public void testVerifyUserPasswordCallsBcryptWhenUserExists(){
-    UserserviceApplication.setBcryptHelper(bcryptHelperMock);
-    application.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORT);
-    verify(bcryptHelperMock, Mockito.times(1)).checkpw(TESTUSER_PASSWORT, user.getPassword());
+    UserController.setBcryptHelper(bcryptHelperMock);
+    controller.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORD);
+    verify(bcryptHelperMock, Mockito.times(1)).checkpw(TESTUSER_PASSWORD, user.getPassword());
   }
 
   @Test
   public void testVerifyUserPasswordCorrectlyVerifiesCorrectPassword(){
-    UserserviceApplication.setBcryptHelper(bcryptHelperMock);
-    val ret = application.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORT);
+    UserController.setBcryptHelper(new BCryptHelper());
+    val ret = controller.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD);
     assertThat(ret).isNotNull();
   }
 
   @Test
   public void testVerifyUserPasswordCorrectlyRejectsWrongPassword(){
-    UserserviceApplication.setBcryptHelper(bcryptHelperMock);
-    val ret = application.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORT + "2");
+    UserController.setBcryptHelper(new BCryptHelper());
+    val ret = controller.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD + "12");
     assertThat(ret).isNull();
   }
 }
