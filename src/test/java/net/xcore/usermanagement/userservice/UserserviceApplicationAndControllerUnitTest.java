@@ -9,9 +9,9 @@ import java.util.Optional;
 import lombok.val;
 import net.xcore.usermanagement.userservice.UserserviceApplication.FilesHelper;
 import net.xcore.usermanagement.userservice.controller.UserController;
-import net.xcore.usermanagement.userservice.controller.UserController.BCryptHelper;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
+import net.xcore.usermanagement.userservice.service.UserService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +35,7 @@ public class UserserviceApplicationAndControllerUnitTest {
   private UserserviceApplication.Runner runnerMock;
   private UserController controller;
   private User user;
+  private UserService userService;
 
   @SuppressWarnings("NewClassNamingConvention")
   private static class FilesHelperWrapperMock extends FilesHelper {
@@ -50,7 +51,7 @@ public class UserserviceApplicationAndControllerUnitTest {
   }
 
   private final FilesHelperWrapperMock filesHelperWrapperMock = new FilesHelperWrapperMock();
-  private final UserController.BCryptHelper bcryptHelperMock = Mockito.mock(UserController.BCryptHelper.class);
+  private final UserService.BCryptHelper bcryptHelperMock = Mockito.mock(UserService.BCryptHelper.class);
 
   @Before
   public void initMocks() {
@@ -65,7 +66,8 @@ public class UserserviceApplicationAndControllerUnitTest {
     UserserviceApplication.setRunner(runnerMock);
     UserserviceApplication.setFilesHelper(filesHelperWrapperMock);
 
-    controller = new UserController(repositoryMock);
+    userService = new UserService(repositoryMock);
+    controller = new UserController(userService);
   }
 
   @Test
@@ -96,7 +98,7 @@ public class UserserviceApplicationAndControllerUnitTest {
   @Test
   public void testApplicationCallsRepositoryWhenCallingSetUser(){
     User user = new User();
-    controller.setUser(user);
+    controller.postUser(user);
     verify(repositoryMock, times(1)).save(user);
     assertIsBcryptHash(user);
     System.out.println(user);
@@ -112,21 +114,21 @@ public class UserserviceApplicationAndControllerUnitTest {
 
   @Test
   public void testVerifyUserPasswordCallsBcryptWhenUserExists(){
-    UserController.setBcryptHelper(bcryptHelperMock);
+    UserService.setBcryptHelper(bcryptHelperMock);
     controller.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORD);
     verify(bcryptHelperMock, Mockito.times(1)).checkpw(TESTUSER_PASSWORD, user.getPassword());
   }
 
   @Test
   public void testVerifyUserPasswordCorrectlyVerifiesCorrectPassword(){
-    UserController.setBcryptHelper(new BCryptHelper());
+    UserService.setBcryptHelper(new UserService.BCryptHelper());
     val ret = controller.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD);
     assertThat(ret).isNotNull();
   }
 
   @Test
   public void testVerifyUserPasswordCorrectlyRejectsWrongPassword(){
-    UserController.setBcryptHelper(new BCryptHelper());
+    UserService.setBcryptHelper(new UserService.BCryptHelper());
     val ret = controller.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD + "12");
     assertThat(ret).isNull();
   }
