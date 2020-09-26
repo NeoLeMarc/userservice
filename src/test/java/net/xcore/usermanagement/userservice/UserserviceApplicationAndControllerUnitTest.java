@@ -8,10 +8,10 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 import java.util.Optional;
 import lombok.val;
 import net.xcore.usermanagement.userservice.UserserviceApplication.FilesHelper;
-import net.xcore.usermanagement.userservice.controller.UserController;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
 import net.xcore.usermanagement.userservice.service.UserService;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,12 +28,12 @@ public class UserserviceApplicationAndControllerUnitTest {
   public static final String TESTUSER_PASSWORD =  BCrypt.hashpw(TESTUSER_UNHASHED_PASSWORD, BCrypt.gensalt());
   public static final String TESTUSER_ROLE = "testrole";
   public static final String SPRING_BOOT_PROPERTY_LOCATION = "/does/not/exist.properties";
+
   @Mock
   private UserRepository repositoryMock;
 
   @Mock
   private UserserviceApplication.Runner runnerMock;
-  private UserController controller;
   private User user;
   private UserService userService;
 
@@ -67,16 +67,8 @@ public class UserserviceApplicationAndControllerUnitTest {
     UserserviceApplication.setFilesHelper(filesHelperWrapperMock);
 
     userService = new UserService(repositoryMock);
-    controller = new UserController(userService);
   }
 
-  @Test
-  public void testApplicationCallsRepositoryWhenCallingGetUser(){
-    val user = controller.getUser(TESTUSER_USERNAME);
-    verify(repositoryMock, times(1)).findById(TESTUSER_USERNAME);
-    assertTrue(user.isPresent());
-    assertThat(user.get().getUsername()).isEqualTo(TESTUSER_USERNAME);
-  }
 
   @Test
   public void testPublicStaticVoidMainWithoutArguments(){
@@ -96,13 +88,20 @@ public class UserserviceApplicationAndControllerUnitTest {
   }
 
   @Test
-  public void testApplicationCallsRepositoryWhenCallingSetUser(){
+  public void userServiceCallsReposiotryWhenCallingGetUser(){
+    val user = userService.getUser(TESTUSER_USERNAME);
+    verify(repositoryMock, times(1)).findById(TESTUSER_USERNAME);
+    assertTrue(user.isPresent());
+    AssertionsForClassTypes.assertThat(user.get().getUsername()).isEqualTo(TESTUSER_USERNAME);
+  }
+
+  @Test
+  public void testUserServiceCallsRepositoryWhenCallingCreateUser(){
     User user = new User();
-    controller.postUser(user);
+    userService.createUser(user);
     verify(repositoryMock, times(1)).save(user);
     assertIsBcryptHash(user);
     System.out.println(user);
-
   }
 
   private static void assertIsBcryptHash(User user) {
@@ -115,21 +114,21 @@ public class UserserviceApplicationAndControllerUnitTest {
   @Test
   public void testVerifyUserPasswordCallsBcryptWhenUserExists(){
     UserService.setBcryptHelper(bcryptHelperMock);
-    controller.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORD);
+    userService.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_PASSWORD);
     verify(bcryptHelperMock, Mockito.times(1)).checkpw(TESTUSER_PASSWORD, user.getPassword());
   }
 
   @Test
   public void testVerifyUserPasswordCorrectlyVerifiesCorrectPassword(){
     UserService.setBcryptHelper(new UserService.BCryptHelper());
-    val ret = controller.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD);
+    val ret = userService.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD);
     assertThat(ret).isNotNull();
   }
 
   @Test
   public void testVerifyUserPasswordCorrectlyRejectsWrongPassword(){
     UserService.setBcryptHelper(new UserService.BCryptHelper());
-    val ret = controller.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD + "12");
+    val ret = userService.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD + "12");
     assertThat(ret).isNull();
   }
 }
