@@ -4,7 +4,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.java.Log;
-import net.xcore.usermanagement.userservice.controller.UserController;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
 import org.apache.commons.lang3.StringUtils;
