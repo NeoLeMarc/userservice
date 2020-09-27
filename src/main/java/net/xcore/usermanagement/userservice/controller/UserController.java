@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import net.xcore.usermanagement.userservice.domain.User;
 import net.xcore.usermanagement.userservice.service.UserService;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,19 +25,34 @@ public class UserController {
     return "Hello from userservice" + name + '!';
   }
 
+  @GetMapping("/helloadmin")
+  @Secured("ADMIN")
+  public String helloAdmin(@RequestParam(value = "name", defaultValue = "World") String name){
+    return "Hello admin - from userservice" + name + '!';
+  }
+
+  @GetMapping("/hellouser")
+  @Secured("USER")
+  public String helloUser(@RequestParam(value = "name", defaultValue = "World") String name){
+    return "Hello user - from userservice" + name + '!';
+  }
+
   @GetMapping("/user/{username}")
+  @Secured("USER")
   public Optional<User> getUser(@PathVariable String username){
     log.info("GET /user/" + username);
     Optional<User> user = userService.getUser(username);
     return user;
   }
 
+  @Secured("ADMIN")
   @PostMapping(value = "/user", consumes = "application/json", produces = "application/json")
   public Optional<User> postUser(@RequestBody User user){
     return userService.createUser(user);
   }
 
   @PostMapping(value = "/user/verify", produces = "application/json")
+  @Secured("USER")
   public User verifyUserPassword(@RequestParam("username") String username, @RequestParam("password") String password) {
     log.info("POST /verify/" + username);
     return userService.verifyUserPassword(username, password);
