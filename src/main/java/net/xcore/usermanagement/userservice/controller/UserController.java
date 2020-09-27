@@ -26,33 +26,33 @@ public class UserController {
   }
 
   @GetMapping("/helloadmin")
-  @Secured("ADMIN")
+  @Secured("ROLE_ADMIN")
   public String helloAdmin(@RequestParam(value = "name", defaultValue = "World") String name){
     return "Hello admin - from userservice" + name + '!';
   }
 
   @GetMapping("/hellouser")
-  @Secured("USER")
+  @Secured("ROLE_USER")
   public String helloUser(@RequestParam(value = "name", defaultValue = "World") String name){
     return "Hello user - from userservice" + name + '!';
   }
 
   @GetMapping("/user/{username}")
-  @Secured("USER")
+  @Secured("ROLE_USER")
   public Optional<User> getUser(@PathVariable String username){
     log.info("GET /user/" + username);
     Optional<User> user = userService.getUser(username);
     return user;
   }
 
-  @Secured("ADMIN")
+  @Secured("ROLE_ADMIN")
   @PostMapping(value = "/user", consumes = "application/json", produces = "application/json")
   public Optional<User> postUser(@RequestBody User user){
     return userService.createUser(user);
   }
 
   @PostMapping(value = "/user/verify", produces = "application/json")
-  @Secured("USER")
+  @Secured("ROLE_USER")
   public User verifyUserPassword(@RequestParam("username") String username, @RequestParam("password") String password) {
     log.info("POST /verify/" + username);
     return userService.verifyUserPassword(username, password);
