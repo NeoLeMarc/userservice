@@ -6,6 +6,7 @@ import lombok.extern.java.Log;
 import net.xcore.usermanagement.userservice.domain.User;
 import net.xcore.usermanagement.userservice.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,8 +24,9 @@ public class UserController {
     return "Hello from userservice" + name + '!';
   }
 
-  @GetMapping("/user")
-  public Optional<User> getUser(@RequestParam("username") String username){
+  @GetMapping("/user/{username}")
+  public Optional<User> getUser(@PathVariable String username){
+    log.info("GET /user/" + username);
     Optional<User> user = userService.getUser(username);
     return user;
   }
@@ -36,6 +38,7 @@ public class UserController {
 
   @PostMapping(value = "/user/verify", produces = "application/json")
   public User verifyUserPassword(@RequestParam("username") String username, @RequestParam("password") String password) {
+    log.info("POST /verify/" + username);
     return userService.verifyUserPassword(username, password);
   }
 }

@@ -4,6 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.java.Log;
+import lombok.val;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +35,11 @@ public class UserService {
   private static UserService.BCryptHelper bcryptHelper = new UserService.BCryptHelper();
 
   public Optional<User> getUser(String username){
-    return repository.findById(username);
+    val user = repository.findById(username);
+    if(user.isEmpty()){
+      log.warning("User with username " + username + " not found!");
+    }
+    return user;
   }
 
   public Optional<User> createUser(User user){
@@ -56,13 +61,16 @@ public class UserService {
     Optional<User> ouser = repository.findById(username);
     if(ouser.isEmpty()){
       bcryptHelper.checkpw(password, BCrypt.gensalt()+"asdf");
+      log.warning("User " + username + " not found");
       return null;
     }
 
     User user = ouser.get();
     if(bcryptHelper.checkpw(password, user.getPassword())){
+      log.info("Password successfully verified for user" + user.getUsername());
       return user;
     }
+    log.warning("Password verification failed for user" + username);
     return null;
   }
 }
