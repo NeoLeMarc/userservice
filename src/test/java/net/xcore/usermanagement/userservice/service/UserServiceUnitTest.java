@@ -83,13 +83,13 @@ public class UserServiceUnitTest {
   public void testVerifyUserPasswordCorrectlyVerifiesCorrectPassword(){
     UserService.setBcryptHelper(new UserService.BCryptHelper());
     val ret = userService.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD);
-    assertThat(ret).isNotNull();
+    assertThat(ret).isNotEmpty();
   }
 
   @Test
   public void testVerifyUserPasswordCorrectlyRejectsWrongPassword(){
     UserService.setBcryptHelper(new UserService.BCryptHelper());
     val ret = userService.verifyUserPassword(TESTUSER_USERNAME, TESTUSER_UNHASHED_PASSWORD + "12");
-    assertThat(ret).isNull();
+    assertThat(ret).isEmpty();
   }
 }

@@ -57,20 +57,20 @@ public class UserService {
     return repository.findById(user.getUsername());
   }
 
-  public User verifyUserPassword(String username, String password){
+  public Optional<User> verifyUserPassword(String username, String password){
     Optional<User> ouser = repository.findById(username);
     if(ouser.isEmpty()){
       bcryptHelper.checkpw(password, BCrypt.gensalt()+"asdf");
       log.warning("User " + username + " not found");
-      return null;
+      return Optional.empty();
     }
 
     User user = ouser.get();
     if(bcryptHelper.checkpw(password, user.getPassword())){
       log.info("Password successfully verified for user" + user.getUsername());
-      return user;
+      return ouser;
     }
-    log.warning("Password verification failed for user" + username);
-    return null;
+    log.warning("Password verification failed for user " + username);
+    return Optional.empty();
   }
 }

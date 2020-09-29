@@ -53,7 +53,7 @@ public class UserController {
 
   @PostMapping(value = "/user/verify", produces = "application/json")
   @Secured("ROLE_USER")
-  public User verifyUserPassword(@RequestParam("username") String username, @RequestParam("password") String password) {
+  public Optional<User> verifyUserPassword(@RequestParam("username") String username, @RequestParam("password") String password) {
     log.info("POST /verify/" + username);
     return userService.verifyUserPassword(username, password);
   }

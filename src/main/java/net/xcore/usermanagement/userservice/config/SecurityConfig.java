@@ -1,5 +1,6 @@
 package net.xcore.usermanagement.userservice.config;
 
+import net.xcore.usermanagement.userservice.util.CustomAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,8 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -22,12 +21,18 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Autowired
-  public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+  private CustomAuthenticationProvider customAuthenticationProvider;
+
+  @Autowired
+  public void configureGlobal(AuthenticationManagerBuilder auth) {
+    /*
     auth.inMemoryAuthentication().withUser("user")
         .password(passwordEncoder().encode("password"))
         .roles("USER");
     auth.inMemoryAuthentication().withUser("admin").password(passwordEncoder().encode("secret"))
         .roles("ADMIN", "USER");
+        */
+    auth.authenticationProvider(customAuthenticationProvider);
   }
 
   @SuppressWarnings("ProhibitedExceptionDeclared")
