@@ -73,6 +73,7 @@ public class UserControllerIntegrationTest {
     performPostUserRequest();
   }
 
+  @SuppressWarnings("OverlyBroadThrowsClause")
   private void performPostUserRequest() throws Exception {
     ObjectMapper mapper = new ObjectMapper();
     User testUser = new User();
