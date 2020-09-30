@@ -2,6 +2,9 @@ package net.xcore.usermanagement.userservice.util;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.java.Log;
 import net.xcore.usermanagement.userservice.domain.User;
 import net.xcore.usermanagement.userservice.service.UserService;
@@ -19,6 +22,8 @@ import org.springframework.stereotype.Component;
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
   @Autowired
+  @Getter
+  @Setter
   private UserService userService;
 
   @Override
