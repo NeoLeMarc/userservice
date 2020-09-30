@@ -45,7 +45,8 @@ public class UserServiceUnitTest {
     Optional<User> ouser = Optional.of(user);
     Mockito.when(repositoryMock.findById(Mockito.eq(TESTUSER_USERNAME))).thenReturn(ouser);
 
-    userService = new UserService(repositoryMock);
+    userService = new UserService();
+    userService.setRepository(repositoryMock);
   }
 
   @Test

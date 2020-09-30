@@ -1,6 +1,7 @@
 package net.xcore.usermanagement.userservice.service;
 
 import java.util.Optional;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.java.Log;
@@ -8,6 +9,7 @@ import lombok.val;
 import net.xcore.usermanagement.userservice.dao.UserRepository;
 import net.xcore.usermanagement.userservice.domain.User;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +17,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Log
 public class UserService {
-  private final UserRepository repository;
+
+  @Getter
+  @Setter
+  @Autowired
+  private UserRepository repository;
 
   public static class BCryptHelper {
     public String hashpw(String password, String salt){
