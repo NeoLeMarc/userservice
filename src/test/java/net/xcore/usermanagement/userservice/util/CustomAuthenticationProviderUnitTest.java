@@ -53,8 +53,6 @@ public class CustomAuthenticationProviderUnitTest {
     adminUser.setUsername(ADMIN_USERNAME);
     adminUser.setPassword(ADMIN_PASSWORD);
 
-    Mockito.when(mockUserService.getUser(Mockito.eq(USER_USERNAME))).thenReturn(Optional.of(user));
-    Mockito.when(mockUserService.getUser(Mockito.eq(ADMIN_USERNAME))).thenReturn(Optional.of(adminUser));
     Mockito.when(mockUserService.verifyUserPassword(Mockito.eq(ADMIN_USERNAME), Mockito.eq(ADMIN_PASSWORD))).thenReturn(Optional.of(adminUser));
     Mockito.when(mockUserService.verifyUserPassword(Mockito.eq(USER_USERNAME), Mockito.eq(USER_PASSWORD))).thenReturn(Optional.of(user));
   }
